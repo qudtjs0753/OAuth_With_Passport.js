@@ -8,5 +8,7 @@ module.exports =  {
         CLIENTID : env.CLIENTID,
         CLIENTPASSWD: env.CLIENTPASSWD,
     },
-    MONGODB :env.MONGODB,
+    session: {
+        cookieKey: env.COOKIEKEY,
+    }
   };

@@ -1,27 +1,35 @@
 const express = require('express');
+const AuthController = require('./Controllers/AuthController');
+const ProfileController = require('./Controllers/ProfileController');
+const passport = require('passport');
 const env = require('./config/index')
-const authRoutes = require('./routes/auth-routes');
-const passportSetup = require('./config/passport-setup'); //이거 추가해줘야 passport에서 google strategy를 인식한다.
-const app = express();
-const mongoose = require('mongoose');
+const googlePassport = require('./config/passport/passportIndex'); //이거 추가해줘야 passport에서 google strategy를 인식한다.
+const cookieSession = require('cookie-session');
+const ProfileService = require('./Services/ProfileService');
 
+const app = express();
 
 
 //set up view engine
 app.set('view engine', 'ejs');
 
-//connect mongodb
-mongoose.connect(`${env.MONGODB}`, () => {
-    console.log('connected to mongoDB');
-});
+googlePassport(passport);
+
+//config cookie
+app.use(cookieSession({
+    maxAge: 24 * 60 * 60 * 1000,
+    keys: [env.session.cookieKey]
+}));
+
+//initialize passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 //set up routes
-app.use('/auth', authRoutes);
-
+app.use('/auth', AuthController);
+app.use('/profile', ProfileController);
 //create home route
-app.get('/',(req, res) => {
-    res.render('home');
-});
+app.get('/',ProfileService.getUserProfileInHome);
 
 
 app.listen(3000, () => {
